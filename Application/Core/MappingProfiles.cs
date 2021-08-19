@@ -1,4 +1,6 @@
+using Application.Users.DTOs;
 using AutoMapper;
+using Domain;
 
 namespace Application.Core
 {
@@ -6,6 +8,7 @@ namespace Application.Core
     {
         public MappingProfiles()
         {
+            CreateMap<UpdateDto, AppUser>();
         }
     }
 }

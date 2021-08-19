@@ -1,7 +1,10 @@
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Application.Users;
 using Application.Users.DTOs;
+using Domain;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -9,8 +12,10 @@ namespace API.Controllers
     [AllowAnonymous]
     public class AccountController : BaseApiController
     {
-        public AccountController()
+        private readonly UserManager<AppUser> _userManager;
+        public AccountController(UserManager<AppUser> userManager)
         {
+            _userManager = userManager;
         }
 
         [HttpPost("login")]
@@ -20,60 +25,29 @@ namespace API.Controllers
             return HandleResult(result);
         }
 
-
-
-/*
-       
-
         [HttpPost("register")]
-        public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
+        public async Task<IActionResult> Register(RegisterDto registerDto)
         {
-            if (await _userManager.Users.AnyAsync(x => x.Email == registerDto.Email))
-            {
-                return BadRequest("Email taken");
-            }
-            if (await _userManager.Users.AnyAsync(x => x.UserName == registerDto.Username))
-            {
-                return BadRequest("Username taken");
-            }
-
-            var user = new AppUser
-            {
-                PrivateNumber=registerDto.PrivateNumber,
-                Email = registerDto.Email,
-                UserName = registerDto.Username
-            };
-
-            var result = await _userManager.CreateAsync(user, registerDto.Password);
-
-            if (result.Succeeded)
-            {
-                return CreateUserObject(user);
-            }
-
-            return BadRequest("Problem registering user");
+            var result = await Mediator.Send(new Register.Command { Registration = registerDto });
+            return HandleResult(result);
         }
 
         [Authorize]
-        [HttpGet]
-        public async Task<ActionResult<UserDto>> GetCurrentUser()
+        [HttpPost("update")]
+        public async Task<IActionResult> Update(UpdateDto updateDto)
         {
-            var user = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
-
-            return CreateUserObject(user);
+            var currentUser = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
+            var result = await Mediator.Send(new Update.Command { Update = updateDto , User = currentUser});
+            return HandleResult(result);
         }
 
-        private UserDto CreateUserObject(AppUser user)
+        [Authorize]
+        [HttpPost("delete")]
+        public async Task<IActionResult> Delete()
         {
-            return new UserDto
-            {
-                PrivateNumber=user.PrivateNumber,
-                Username = user.UserName,
-                IsEmployed=user.IsEmployed,
-                IsMarried=user.IsMarried,
-                MonthSalary=user.MonthSalary,
-                Token = _tokenService.CreateToken(user)
-            };
-        } */
+            var currentUser = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
+            await _userManager.DeleteAsync(currentUser);
+            return Ok();
+        }
     }
 }
