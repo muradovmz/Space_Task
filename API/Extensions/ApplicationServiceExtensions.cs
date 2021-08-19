@@ -1,6 +1,9 @@
 using Application.Core;
+using Application.Helpers;
 using Application.Interfaces;
+using Application.Users;
 using Infrastructure.Security;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,8 +27,10 @@ namespace API.Extensions
                     policy.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin();
                 });
             });
+            services.AddMediatR(typeof(Login.Handler).Assembly);
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
             services.AddScoped<IUserAccessor,UserAccessor>();
+            services.Configure<AppSettings>(config.GetSection("AppSettings"));
 
             return services;
         }

@@ -3,18 +3,20 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Application.Helpers;
+using AutoMapper.Configuration;
 using Domain;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace API.Services
+namespace Application.Services
 {
     public class TokenService
     {
-        private readonly IConfiguration _config;
-        public TokenService(IConfiguration config)
+        private readonly AppSettings _appSettings;
+        public TokenService(IOptions<AppSettings> appSettings)
         {
-            _config = config;
+            _appSettings = appSettings.Value;
         }
 
         public string CreateToken(AppUser user)
@@ -26,7 +28,7 @@ namespace API.Services
                 new Claim(ClaimTypes.Email, user.Email),
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["TokenKey"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSettings.TokenKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
             var tokenDescriptor = new SecurityTokenDescriptor
