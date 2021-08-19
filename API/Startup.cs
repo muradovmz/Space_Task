@@ -36,6 +36,7 @@ namespace API
                 var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
                 opt.Filters.Add(new AuthorizeFilter(policy));
             });
+            services.AddSwaggerDocumentation();
             services.AddApplicationServices(_config);
             services.AddIdentityServices(_config);
         }
@@ -44,12 +45,6 @@ namespace API
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseMiddleware<ExceptionMiddleware>();
-            
-            if (env.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
-            }
 
             //app.UseHttpsRedirection();
 
@@ -57,6 +52,8 @@ namespace API
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseSwaggerDocumention();
 
             app.UseEndpoints(endpoints =>
             {
