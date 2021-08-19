@@ -18,6 +18,13 @@ namespace API.Controllers
             _userManager = userManager;
         }
 
+        /// <summary>
+        /// Authentification and Autorization
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <returns>JWT Token</returns>
+        /// <response code="200">Returns the newly created token</response>
+        /// <response code="401">If the login is failed</response>  
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
@@ -25,6 +32,12 @@ namespace API.Controllers
             return HandleResult(result);
         }
 
+        /// <summary>
+        /// Registration for new user
+        /// </summary>
+        /// <param name="registerDto"></param>
+        /// <response code="200">Returns Success status</response>
+        /// <response code="400">If the registation is failed</response> 
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto registerDto)
         {
@@ -32,8 +45,15 @@ namespace API.Controllers
             return HandleResult(result);
         }
 
+
+        /// <summary>
+        /// Update user data
+        /// </summary>
+        /// <param name="updateDto"></param>
+        /// <response code="200">Returns Success status</response>
+        /// <response code="400">If the patching is failed</response> 
         [Authorize]
-        [HttpPost("update")]
+        [HttpPatch("update")]
         public async Task<IActionResult> Update(UpdateDto updateDto)
         {
             var currentUser = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
@@ -41,6 +61,11 @@ namespace API.Controllers
             return HandleResult(result);
         }
 
+
+        /// <summary>
+        /// Delete user
+        /// </summary>
+        /// <response code="200">Returns Success status</response>
         [Authorize]
         [HttpPost("delete")]
         public async Task<IActionResult> Delete()
